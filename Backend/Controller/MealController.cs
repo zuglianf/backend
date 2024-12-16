@@ -20,10 +20,21 @@ public class MealController : ControllerBase
         var re = context.Requests.FirstOrDefault(t => t.requestUser == request);
         if (re == null)
         {
+            //Richiesta se la richiesta assente allora inserisce nel db
+            //Se non presente nell'api non lo scrive nelle richieste
             Request c = new Request(request);
-            context.Requests.Add(c);
-            context.SaveChanges();
-            return base.Ok(m.retrieveMeal(c.requestUser));
+            Meal temp = m.retrieveMeal(c.requestUser);
+
+            if(!(temp.meals == null)){
+                context.Requests.Add(c);
+                context.SaveChanges();
+                // invia la richiesta api 
+                // NON ricerco nel database la richiesta
+                return base.Ok(temp);}
+            else
+            {
+                return BadRequest("Richiesta non presente");
+            }
         }
         else
         {
